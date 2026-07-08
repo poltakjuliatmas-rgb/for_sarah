@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Birthday Surprise 🎂</title>
+
+<style>
+    #touchControls{display:none}
+
+@media(max-width:700px){
+  #touchControls{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+  }
+
+  #touchControls button{
+    width:80px;
+    height:60px;
+    font-size:28px;
+    margin-top:0;
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{min-height:100vh;overflow:hidden;color:#fff;background:linear-gradient(135deg,#1e3a8a,#9333ea)}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 30%),radial-gradient(circle at 80% 30%,rgba(255,255,255,.12),transparent 30%),radial-gradient(circle at 50% 80%,rgba(255,255,255,.1),transparent 30%);animation:bgMove 8s ease-in-out infinite alternate;pointer-events:none}
+
+@keyframes bgMove{from{transform:translateY(-20px)}to{transform:translateY(20px)}}
+@keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes bounce{50%{transform:scale(1.15)}}
+@keyframes floatUp{from{opacity:1;transform:translateY(0) rotate(0)}to{opacity:0;transform:translateY(-110vh) rotate(360deg)}}
+@keyframes sparkle{0%{opacity:0;transform:scale(.2)}50%{opacity:1}100%{opacity:0;transform:scale(2)}}
+
+.page{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;opacity:0;visibility:hidden;transition:.6s}
+.active{opacity:1;visibility:visible}
+
+.login-box{width:350px;max-width:90%;padding:30px;border-radius:25px;background:rgba(255,255,255,.1);backdrop-filter:blur(12px);box-shadow:0 0 20px rgba(255,255,255,.2),0 0 40px rgba(255,255,255,.1)}
+.login-box h1{margin-bottom:20px}
+
+input{width:100%;padding:14px;margin:10px 0;border:none;border-radius:12px;outline:none;transition:.3s}
+input:focus{transform:scale(1.02)}
+
+button{margin-top:10px;padding:12px 25px;border:none;border-radius:12px;background:#f472b6;color:#fff;cursor:pointer;transition:.3s}
+button:hover{transform:translateY(-2px)}
+
+canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
+.progress{width:320px;max-width:90%;height:18px;background:rgba(255,255,255,.2);border-radius:50px;overflow:hidden;margin-top:10px}
+#progressBar{width:0;height:100%;border-radius:50px;background:#f472b6;transition:.3s}
+#giftBox{display:none;margin-top:20px;font-size:120px;cursor:pointer;animation:bounce 1s infinite}
+
+.card{width:85%;max-width:650px;background:#fff;color:#333;padding:40px;border-radius:25px;box-shadow:0 0 30px rgba(0,0,0,.3);animation:popIn .8s ease}
+.card h1{color:#e11d48}
+
+.floating{position:fixed;font-size:28px;bottom:-60px;pointer-events:none;animation:floatUp 6s linear forwards}
+.sparkle{position:fixed;font-size:30px;animation:sparkle 1.5s ease-out forwards}
+</style>
+</head>
+<body>
+
+<div id="page1" class="page active">
+  <div class="login-box">
+    <h1>Hello there !!! Please verify your self 😁</h1>
+    <input id="username" placeholder="Your Name">
+    <input id="password" type="date">
+    <button onclick="verify()">Verify</button>
+    <p id="error" style="margin-top:15px;color:#ffb4b4"></p>
+  </div>
+</div>
+
+<div id="pageWelcome" class="page">
+  <div class="card">
+    <h1 id="welcomeTitle">Hello!</h1>
+    <p style="margin-top:20px;line-height:1.8">
+      I see today is your special day 😁<br><br>
+      I have a small gift for you but you need to complete this game.<br><br>
+      Catch 10 cakes 🎂 to unlock the gift 🎁
+    </p>
+    <button style="margin-top:25px" onclick="startGame(this)">Start The Challenge 🎮</button>
+  </div>
+</div>
+
+<div id="page2" class="page">
+  <h1>🎮 Catch 10 Cakes</h1>
+  <h2 id="score">Score: 0</h2>
+  <div class="progress"><div id="progressBar"></div></div>
+  <canvas id="game"></canvas>
+  <div id="giftBox">🎁</div>
+</div>
+
+<div id="page3" class="page">
+  <div class="card">
+    <h1>🎉 HAPPY BIRTHDAY 🎉</h1>
+    <p style="margin-top:20px;line-height:1.8">
+      Selamat ulang tahun ya, panjang umur, semoga diberi rejeki yang melimpah dan semoga apa yang kamu impikan bisa tercapai.
+      <br><br>
+      Hadiah sudah terkirim semoga kamu senang ya hahaha...
+      <br><br>
+      ✨🎂🎉
+    </p>
+  </div>
+</div>
+
+<script>
+const CORRECT_NAME='Sarah';
+const CORRECT_BIRTHDAY='1998-07-14';
+
+const $=id=>document.getElementById(id);
+
+const canvas=$('game'),ctx=canvas.getContext('2d');
+
+let cakes=[],score=0,gamePaused=false,gameStarted=false;
+
+const player={
+ x:260,
+ y:340,
+ speed:8
+};
+
+const keys={};
+
+// ===============================
+// TOUCH & MOUSE CONTROL
+// ===============================
+
+let targetX=player.x;
+let dragging=false;
+
+function getPointerX(e){
+ const rect=canvas.getBoundingClientRect();
+
+ if(e.touches && e.touches.length){
+  return e.touches[0].clientX-rect.left;
+ }
+
+ return e.clientX-rect.left;
+}
+
+function updatePlayerPosition(x){
+ targetX=x-30;
+
+ if(targetX<0) targetX=0;
+
+ if(targetX>canvas.width-60)
+  targetX=canvas.width-60;
+}
+
+canvas.addEventListener('touchstart',e=>{
+ dragging=true;
+ updatePlayerPosition(getPointerX(e));
+},{passive:false});
+
+canvas.addEventListener('touchmove',e=>{
+ if(!dragging) return;
+
+ e.preventDefault();
+ updatePlayerPosition(getPointerX(e));
+},{passive:false});
+
+canvas.addEventListener('touchend',()=>{
+ dragging=false;
+});
+
+canvas.addEventListener('mousedown',e=>{
+ dragging=true;
+ updatePlayerPosition(getPointerX(e));
+});
+
+canvas.addEventListener('mousemove',e=>{
+ if(!dragging) return;
+ updatePlayerPosition(getPointerX(e));
+});
+
+window.addEventListener('mouseup',()=>{
+ dragging=false;
+});
+
+canvas.addEventListener('pointerdown',e=>{
+ dragging=true;
+ updatePlayerPosition(getPointerX(e));
+});
+
+canvas.addEventListener('pointermove',e=>{
+ if(!dragging) return;
+ updatePlayerPosition(getPointerX(e));
+});
+
+window.addEventListener('pointerup',()=>{
+ dragging=false;
+});
+
+function showPage(id){
+ document.querySelectorAll('.page').forEach(
+  p=>p.classList.remove('active')
+ );
+
+ $(id).classList.add('active');
+}
+
+function verify(){
+ const user=$('username').value.trim();
+ const birthday=$('password').value;
+
+ if(
+  user.toLowerCase()===CORRECT_NAME.toLowerCase() &&
+  birthday===CORRECT_BIRTHDAY
+ ){
+  $('welcomeTitle').innerHTML=`🎉 Hello ${user}! 🎉`;
+  showPage('pageWelcome');
+ }else{
+  $('error').innerText='Oppss...this one is not for you! 😅';
+ }
+}
+
+function resizeCanvas(){
+ [canvas.width,canvas.height]=
+ window.innerWidth<700
+ ?[350,300]
+ :[600,400];
+}
+
+resizeCanvas();
+
+window.addEventListener('resize',resizeCanvas);
+
+['keydown','keyup'].forEach(type=>
+ document.addEventListener(type,e=>
+  keys[e.key]=type==='keydown'
+ )
+);
+
+function startGame(btn){
+
+ gameStarted=false;
+
+ let count=3;
+
+ btn.disabled=true;
+ btn.innerHTML=count;
+
+ const timer=setInterval(()=>{
+
+  if(--count>0){
+   btn.innerHTML=count;
+  }else{
+
+   clearInterval(timer);
+
+   btn.innerHTML='GO! 🚀';
+
+   setTimeout(()=>{
+
+    gameStarted=true;
+    cakes=[];
+    score=0;
+    gamePaused=false;
+
+    $('score').innerText='Score: 0';
+    $('progressBar').style.width='0%';
+    $('giftBox').style.display='none';
+
+    player.x=canvas.width/2-30;
+    targetX=player.x;
+
+    player.y=canvas.height-40;
+
+    showPage('page2');
+
+   },500);
+
+  }
+
+ },1000);
+
+}
+
+setInterval(()=>{
+
+ if(gameStarted && !gamePaused){
+
+  cakes.push({
+   x:Math.random()*(canvas.width-50),
+   y:-30
+  });
+
+ }
+
+},1000);
+
+function drawPlayer(){
+ ctx.font='55px serif';
+ ctx.fillText('🧺',player.x,player.y);
+}
+
+function drawCakes(){
+ ctx.font='38px serif';
+
+ cakes.forEach(c=>
+  ctx.fillText('🎂',c.x,c.y)
+ );
+}
+
+function createSparkles(){
+
+ for(let i=0;i<20;i++){
+
+  const s=document.createElement('div');
+
+  s.className='sparkle';
+  s.innerHTML='✨';
+
+  s.style.left=Math.random()*100+'vw';
+  s.style.top=Math.random()*100+'vh';
+
+  document.body.appendChild(s);
+
+  setTimeout(()=>s.remove(),1500);
+
+ }
+
+}
+
+function update(){
+
+ if(!gameStarted || gamePaused){
+
+  requestAnimationFrame(update);
+  return;
+
+ }
+
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ // Keyboard control
+
+ if(keys.ArrowLeft)
+  targetX-=player.speed;
+
+ if(keys.ArrowRight)
+  targetX+=player.speed;
+
+ targetX=Math.max(
+  0,
+  Math.min(targetX,canvas.width-60)
+ );
+
+ // Smooth movement
+
+ player.x+=(targetX-player.x)*0.25;
+
+ cakes.forEach((cake,i)=>{
+
+  cake.y+=2;
+
+  if(
+   cake.y>player.y-40 &&
+   cake.x>player.x-20 &&
+   cake.x<player.x+60
+  ){
+
+   cakes.splice(i,1);
+
+   score++;
+
+   $('score').innerText=`Score: ${score}`;
+   $('progressBar').style.width=`${score*10}%`;
+
+   if(score>=10){
+
+    gamePaused=true;
+
+    createSparkles();
+
+    setTimeout(()=>{
+     $('giftBox').style.display='block';
+    },700);
+
+   }
+
+  }
+
+  if(cake.y>canvas.height){
+   cakes.splice(i,1);
+  }
+
+ });
+
+ drawPlayer();
+ drawCakes();
+
+ requestAnimationFrame(update);
+
+}
+
+update();
+
+function createPartyItem(){
+
+ const items=[
+  '🎈',
+  '🎂',
+  '🎉',
+  '🎊',
+  '🎁',
+  '🍰',
+  '🧁'
+ ];
+
+ const item=document.createElement('div');
+
+ item.className='floating';
+
+ item.innerHTML=
+  items[Math.floor(Math.random()*items.length)];
+
+ item.style.left=Math.random()*100+'vw';
+ item.style.fontSize=(24+Math.random()*20)+'px';
+
+ document.body.appendChild(item);
+
+ setTimeout(()=>{
+  item.remove();
+ },6000);
+
+}
+
+$('giftBox').addEventListener('click',()=>{
+
+ $('giftBox').innerHTML='🎉';
+
+ for(let i=0;i<100;i++){
+  setTimeout(createPartyItem,i*20);
+ }
+
+ setTimeout(()=>{
+
+  showPage('page3');
+
+  setInterval(()=>{
+
+   if($('page3').classList.contains('active')){
+    createPartyItem();
+   }
+
+  },500);
+
+ },1500);
+
+});
+</script>

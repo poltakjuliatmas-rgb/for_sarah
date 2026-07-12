@@ -237,8 +237,14 @@ p{
    style="margin-top:20px;line-height:1.8">
 </p>
 
+<button id="waButton" style="display:none;margin-top:25px;">
+    Tekan jika kamu suka 😁
+</button>
+
   </div>
 </div>
+
+
 
 <script>
 function typeWriter(text, element, speed = 35) {
@@ -248,7 +254,25 @@ function typeWriter(text, element, speed = 35) {
 
     function typing() {
 
-        if (i >= text.length) return;
+        if (i >= text.length) {
+
+            const btn = document.getElementById("waButton");
+
+            btn.style.display = "inline-block";
+
+            btn.animate(
+                [
+                    { opacity: 0, transform: "translateY(20px)" },
+                    { opacity: 1, transform: "translateY(0)" }
+                ],
+                {
+                    duration: 600,
+                    fill: "forwards"
+                }
+            );
+
+            return;
+        }
 
         const char = text.charAt(i);
 
@@ -260,10 +284,9 @@ function typeWriter(text, element, speed = 35) {
 
         i++;
 
-        // Pause longer after punctuation
         let delay = speed;
 
-        if (char === "." || char === "," || char === "!" || char === "?") {
+        if (".,!?".includes(char)) {
             delay = 250;
         }
 
@@ -271,7 +294,8 @@ function typeWriter(text, element, speed = 35) {
     }
 
     typing();
-}
+}     
+
 const birthdayText =
 `Selamat ulang tahun ya...
 
@@ -281,6 +305,14 @@ Aminn.
 
 Hadiah sudah terkirim.
 Semoga kamu senang ya hahaha 😁🎂`;
+
+const photo = document.getElementById("birthdayPhoto");
+const message = document.getElementById("birthdayMessage");
+const btn = document.getElementById("waButton");
+
+photo.classList.remove("show");
+message.innerHTML = "";
+btn.style.display = "none";
 
 const CORRECT_NAME='Sarah';
 const CORRECT_BIRTHDAY='1998-07-14';
@@ -643,6 +675,22 @@ setTimeout(() => {
   },500);
 
  },1500);
+
+});
+document.getElementById("waButton").addEventListener("click", () => {
+
+    const phone = "6285232434050"; // Your number
+
+    const text =
+`Hi 😊
+
+Aku udah buka hadiahnya.
+Makasih banyak ya`;
+
+    window.open(
+        `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
+        "_blank"
+    );
 
 });
 </script>

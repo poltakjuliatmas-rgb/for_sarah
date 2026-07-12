@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Birthday Surprise 🎂</title>
+<title>Untuk Sarah 😁</title>
 
 <style>
     #touchControls{display:none}
@@ -22,6 +22,19 @@
     margin-top:0;
   }
 }
+.birthday-photo{
+    width:250px;
+    height:auto;
+    border-radius:20px;
+    margin:20px auto;
+    display:block;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+    transition:.3s;
+}
+
+.birthday-photo:hover{
+    transform:scale(1.03);
+}
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{min-height:100vh;overflow:hidden;color:#fff;background:linear-gradient(135deg,#1e3a8a,#9333ea)}
 body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 30%),radial-gradient(circle at 80% 30%,rgba(255,255,255,.12),transparent 30%),radial-gradient(circle at 50% 80%,rgba(255,255,255,.1),transparent 30%);animation:bgMove 8s ease-in-out infinite alternate;pointer-events:none}
@@ -35,13 +48,24 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
 .page{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;opacity:0;visibility:hidden;transition:.6s}
 .active{opacity:1;visibility:visible}
 
-.login-box{width:350px;max-width:90%;padding:30px;border-radius:25px;background:rgba(255,255,255,.1);backdrop-filter:blur(12px);box-shadow:0 0 20px rgba(255,255,255,.2),0 0 40px rgba(255,255,255,.1)}
-.login-box h1{margin-bottom:20px}
+.login-box label{
+    display: block;
+    text-align: left;
+    margin: 30px 0 6px;
+    font-weight: bold;
+}
+
+.login-box input{
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 6px;
+}
 
 input{width:100%;padding:14px;margin:10px 0;border:none;border-radius:12px;outline:none;transition:.3s}
 input:focus{transform:scale(1.02)}
 
-button{margin-top:10px;padding:12px 25px;border:none;border-radius:12px;background:#f472b6;color:#fff;cursor:pointer;transition:.3s}
+button{margin-top:30px;padding:15px 30px;border:none;border-radius:12px;background:#ff4d4d;color:#fff;font-size:18px;font-weight:bold; cursor:pointer;transition:.3s}
 button:hover{transform:translateY(-2px)}
 
 canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
@@ -60,25 +84,31 @@ canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
 
 <div id="page1" class="page active">
   <div class="login-box">
-    <h1>Hello there !!! Please verify your self 😁</h1>
-    <input id="username" placeholder="nickname">
+    <h1>Hello there!!! Please verify yourself 😁</h1>
+
+    <label for="username">Nickname</label>
+    <input id="username" type="text" placeholder="Enter your nickname">
+
+    <label for="password">Your Birthday</label>
     <input
-    id="password"
-    type="text"
-    placeholder="Your Birthday"
-    onfocus="this.type='date'"
-    onblur="if(!this.value)this.type='text'">
+      id="password"
+      type="text"
+      placeholder="Select your birthday"
+      onfocus="this.type='date'"
+      onblur="if(!this.value)this.type='text'">
+
     <button onclick="verify()">Verify</button>
-    <p id="error" style="margin-top:15px;color:#ff4d4d></p>
+
+    <p id="error" style="margin-top:15px; color:#ff4d4d; font-size:25px; font-weight:bold;"></p>
   </div>
 </div>
-
+    
 <div id="pageWelcome" class="page">
   <div class="card">
     <h1 id="welcomeTitle">Hello!</h1>
     <p style="margin-top:20px;line-height:1.8">
       I see today is your special day 😁<br><br>
-      I have a small gift for you but you need to complete this game.<br><br>
+      Aku ada hadiah untuk mu tapi kau harus selesaikan dulu game ini.<br><br>
       Catch 10 cakes 🎂 to unlock the gift 🎁
     </p>
     <button style="margin-top:25px" onclick="startGame(this)">Start The Challenge 🎮</button>
@@ -95,7 +125,11 @@ canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
 
 <div id="page3" class="page">
   <div class="card">
+
     <h1>🎉 HAPPY BIRTHDAY 🎉</h1>
+
+    <img src="Sarah/sarah.jpg" class="birthday-photo" alt="Sarah">
+
     <p style="margin-top:20px;line-height:1.8">
       Selamat ulang tahun ya, panjang umur, semoga diberi rejeki yang melimpah dan semoga apa yang kamu impikan bisa tercapai.
       <br><br>
@@ -103,6 +137,7 @@ canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
       <br><br>
       ✨🎂🎉
     </p>
+
   </div>
 </div>
 
@@ -210,10 +245,10 @@ function verify(){
   user.toLowerCase()===CORRECT_NAME.toLowerCase() &&
   birthday===CORRECT_BIRTHDAY
  ){
-  $('welcomeTitle').innerHTML=`🎉 Hello ${user}! 🎉`;
+  $('welcomeTitle').innerHTML=` Hello ${user}!😉 `;
   showPage('pageWelcome');
  }else{
-  $('error').innerText='Oppss...this one is not for you! 😅';
+  $('error').innerText='Oppss!!!..this one is not for you 😒';
  }
 }
 

@@ -24,14 +24,20 @@
 }
 .birthday-photo{
     width:min(250px,70vw);
-    height:auto;
     border-radius:20px;
     margin:20px auto;
     display:block;
-    box-shadow:0 8px 20px rgba(0,0,0,.25);
-    transition:.3s;
+
+    opacity:0;
+    transform:scale(.9);
+
+    transition:1s;
 }
 
+.birthday-photo.show{
+    opacity:1;
+    transform:scale(1);
+}
 .birthday-photo:hover{
     transform:scale(1.03);
 }
@@ -51,6 +57,14 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
 @keyframes floatUp{from{opacity:1;transform:translateY(0) rotate(0)}to{opacity:0;transform:translateY(-110vh) rotate(360deg)}}
 @keyframes sparkle{0%{opacity:0;transform:scale(.2)}50%{opacity:1}100%{opacity:0;transform:scale(2)}}
 
+.game-container{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:100%;
+}
 .page{
     position:absolute;
     inset:0;
@@ -82,16 +96,22 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
     margin-bottom: 6px;
 }
 
-
-
 input{width:100%;padding:14px;margin:10px 0;border:none;border-radius:12px;outline:none;transition:.3s}
 input:focus{transform:scale(1.02)}
 
 button{
     width:min(300px,100%);
+    margin-top:30px;
+    padding:15px 30px;
+    border:none;
+    border-radius:12px;
+    background:#ff4d4d;
+    color:#fff;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
 }
-button{margin-top:30px;padding:15px 30px;border:none;border-radius:12px;background:#ff4d4d;color:#fff;font-size:18px;font-weight:bold; cursor:pointer;transition:.3s}
-button:hover{transform:translateY(-2px)}
 
 canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
 .progress{width:320px;max-width:90%;height:18px;background:rgba(255,255,255,.2);border-radius:50px;overflow:hidden;margin-top:10px}
@@ -160,11 +180,18 @@ p{
 </div>
 
 <div id="page2" class="page">
-  <h1>🎮 Catch 10 Cakes</h1>
-  <h2 id="score">Score: 0</h2>
-  <div class="progress"><div id="progressBar"></div></div>
-  <canvas id="game"></canvas>
-  <div id="giftBox">🎁</div>
+    <div class="game-container">
+        <h1>🎮 Catch 10 Cakes</h1>
+        <h2 id="score">Score: 0</h2>
+
+        <div class="progress">
+            <div id="progressBar"></div>
+        </div>
+
+        <canvas id="game"></canvas>
+
+        <div id="giftBox">🎁</div>
+    </div>
 </div>
 
 <div id="page3" class="page">
@@ -172,20 +199,60 @@ p{
 
     <h1>🎉 HAPPY BIRTHDAY 🎉</h1>
 
-    <img src="Sarah.png" class="birthday-photo" alt="Sarah">
+<img src="Sarah.png" class="birthday-photo" id="birthdayPhoto" alt="Sarah">
 
-    <p style="margin-top:20px;line-height:1.8">
-      Selamat ulang tahun ya, panjang umur, semoga diberi rejeki yang melimpah dan semoga apa yang kamu impikan bisa tercapai.
-      <br><br>
-      Hadiah sudah terkirim semoga kamu senang ya hahaha...
-      <br><br>
-      ✨🎂🎉
-    </p>
+<p id="birthdayMessage"
+   style="margin-top:20px;line-height:1.8">
+</p>
 
   </div>
 </div>
 
 <script>
+function typeWriter(text, element, speed = 35) {
+
+    element.innerHTML = "";
+    let i = 0;
+
+    function typing() {
+
+        if (i >= text.length) return;
+
+        const char = text.charAt(i);
+
+        if (char === "\n") {
+            element.innerHTML += "<br>";
+        } else {
+            element.innerHTML += char;
+        }
+
+        i++;
+
+        // Pause longer after punctuation
+        let delay = speed;
+
+        if (char === "." || char === "," || char === "!" || char === "?") {
+            delay = 250;
+        }
+
+        setTimeout(typing, delay);
+    }
+
+    typing();
+}
+const birthdayText =
+`Selamat ulang tahun ya...
+
+Panjang umur, sehat selalu, semoga diberi rezeki yang melimpah.
+
+Semoga semua yang kamu impikan satu per satu bisa tercapai.
+
+Aminn.
+
+Hadiah sudah terkirim.
+
+Semoga kamu senang ya hahaha 😁🎂`;
+
 const CORRECT_NAME='Sarah';
 const CORRECT_BIRTHDAY='1998-07-14';
 
@@ -297,13 +364,10 @@ function verify(){
 }
 
 function resizeCanvas(){
-
-    const width = Math.min(window.innerWidth * 0.9, 600);
-
-    canvas.width = width;
-    canvas.height = width * 0.67;
-
-    player.y = canvas.height - 40;
+ [canvas.width,canvas.height]=
+ window.innerWidth<700
+ ?[350,300]
+ :[600,400];
 }
 
 resizeCanvas();
@@ -521,7 +585,25 @@ $('giftBox').addEventListener('click',()=>{
 
  setTimeout(()=>{
 
-  showPage('page3');
+  const photo = document.getElementById("birthdayPhoto");
+const message = document.getElementById("birthdayMessage");
+
+// Reset animation
+photo.classList.remove("show");
+message.innerHTML = "";
+
+showPage("page3");
+
+// Small delay so the page transition finishes first
+setTimeout(() => {
+
+    photo.classList.add("show");
+
+    setTimeout(() => {
+        typeWriter(birthdayText, message, 40);
+    }, 800);
+
+}, 300);
 
   setInterval(()=>{
 

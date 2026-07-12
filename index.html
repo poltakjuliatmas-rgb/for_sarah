@@ -23,7 +23,7 @@
   }
 }
 .birthday-photo{
-    width:250px;
+    width:min(250px,70vw);
     height:auto;
     border-radius:20px;
     margin:20px auto;
@@ -36,7 +36,13 @@
     transform:scale(1.03);
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{min-height:100vh;overflow:hidden;color:#fff;background:linear-gradient(135deg,#1e3a8a,#9333ea)}
+body{
+    min-height:100dvh;
+    overflow-x:hidden;
+    overflow-y:auto;
+    color:#fff;
+    background:linear-gradient(135deg,#1e3a8a,#9333ea);
+}
 body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.15),transparent 30%),radial-gradient(circle at 80% 30%,rgba(255,255,255,.12),transparent 30%),radial-gradient(circle at 50% 80%,rgba(255,255,255,.1),transparent 30%);animation:bgMove 8s ease-in-out infinite alternate;pointer-events:none}
 
 @keyframes bgMove{from{transform:translateY(-20px)}to{transform:translateY(20px)}}
@@ -45,9 +51,23 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
 @keyframes floatUp{from{opacity:1;transform:translateY(0) rotate(0)}to{opacity:0;transform:translateY(-110vh) rotate(360deg)}}
 @keyframes sparkle{0%{opacity:0;transform:scale(.2)}50%{opacity:1}100%{opacity:0;transform:scale(2)}}
 
-.page{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;opacity:0;visibility:hidden;transition:.6s}
+.page{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    overflow-y:auto;
+    text-align:center;
+    opacity:0;
+    visibility:hidden;
+    transition:.6s;
+}
 .active{opacity:1;visibility:visible}
-
+.login-box{
+    width:min(420px,100%);
+}
 .login-box label{
     display: block;
     text-align: left;
@@ -62,9 +82,14 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
     margin-bottom: 6px;
 }
 
+
+
 input{width:100%;padding:14px;margin:10px 0;border:none;border-radius:12px;outline:none;transition:.3s}
 input:focus{transform:scale(1.02)}
 
+button{
+    width:min(300px,100%);
+}
 button{margin-top:30px;padding:15px 30px;border:none;border-radius:12px;background:#ff4d4d;color:#fff;font-size:18px;font-weight:bold; cursor:pointer;transition:.3s}
 button:hover{transform:translateY(-2px)}
 
@@ -73,7 +98,26 @@ canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
 #progressBar{width:0;height:100%;border-radius:50px;background:#f472b6;transition:.3s}
 #giftBox{display:none;margin-top:20px;font-size:120px;cursor:pointer;animation:bounce 1s infinite}
 
-.card{width:85%;max-width:650px;background:#fff;color:#333;padding:40px;border-radius:25px;box-shadow:0 0 30px rgba(0,0,0,.3);animation:popIn .8s ease}
+h1{
+    font-size:clamp(28px,5vw,42px);
+}
+
+h2{
+    font-size:clamp(22px,4vw,30px);
+}
+
+p{
+    font-size:clamp(16px,2vw,20px);
+}
+.card{
+    width:min(900px,95%);
+    background:#fff;
+    color:#333;
+    padding:clamp(20px,4vw,40px);
+    border-radius:25px;
+    box-shadow:0 0 30px rgba(0,0,0,.3);
+    animation:popIn .8s ease;
+}
 .card h1{color:#e11d48}
 
 .floating{position:fixed;font-size:28px;bottom:-60px;pointer-events:none;animation:floatUp 6s linear forwards}
@@ -253,10 +297,13 @@ function verify(){
 }
 
 function resizeCanvas(){
- [canvas.width,canvas.height]=
- window.innerWidth<700
- ?[350,300]
- :[600,400];
+
+    const width = Math.min(window.innerWidth * 0.9, 600);
+
+    canvas.width = width;
+    canvas.height = width * 0.67;
+
+    player.y = canvas.height - 40;
 }
 
 resizeCanvas();

@@ -61,10 +61,15 @@ canvas{background:rgba(255,255,255,.15);border-radius:20px;margin-top:15px}
 <div id="page1" class="page active">
   <div class="login-box">
     <h1>Hello there !!! Please verify your self 😁</h1>
-    <input id="username" placeholder="Your Name">
-    <input id="password" type="date">
+    <input id="username" placeholder="nickname">
+    <input
+    id="password"
+    type="text"
+    placeholder="Your Birthday"
+    onfocus="this.type='date'"
+    onblur="if(!this.value)this.type='text'">
     <button onclick="verify()">Verify</button>
-    <p id="error" style="margin-top:15px;color:#ffb4b4"></p>
+    <p id="error" style="margin-top:15px;color:#ff4d4d></p>
   </div>
 </div>
 
